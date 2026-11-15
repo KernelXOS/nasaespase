@@ -1,0 +1,35 @@
+name: nasaespase
+
+services:
+  nasaespase:
+    image: nasaespase:${RELEASE_TAG:-local}
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: ${BASE_IMAGE:-nginx:stable-alpine}
+    container_name: nasaespase
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:18186:8080"
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.5
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+networks:
+  default:
+    name: nasaespase_network
+    driver: bridge

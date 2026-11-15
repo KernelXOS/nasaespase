@@ -16,6 +16,16 @@ npm start
 
 Open `http://127.0.0.1:4173`. The seven-slide English demonstration is at `/demo/`. Any static host can serve the `dist/` directory.
 
+## Docker deployment
+
+Configured domain: **https://nasaespase.ghosstless.com**. The application runs in its own `nasaespase` container, with Apache terminating HTTPS and forwarding to a loopback-only port.
+
+```sh
+docker compose -p nasaespase -f deploy/compose.yaml up --build -d
+```
+
+The container serves on port 8080, published only at `127.0.0.1:18186`. It runs as a non-root user with a read-only filesystem, a temporary `/tmp`, dropped capabilities and resource limits. Apache examples in `deploy/` configure only this domain and keep ACME validation separate. Credentials and server access details are not included in the repository.
+
 ```sh
 npm test
 npm run check

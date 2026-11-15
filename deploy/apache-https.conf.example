@@ -1,0 +1,45 @@
+# Requires the Apache ssl, rewrite, proxy, proxy_http, headers, and alias modules.
+# Replace this site's bootstrap HTTP virtual host after obtaining its certificate.
+<VirtualHost *:80>
+    ServerName nasaespase.ghosstless.com
+
+    Alias /.well-known/acme-challenge/ "/opt/nasaespase/acme/.well-known/acme-challenge/"
+    <Directory "/opt/nasaespase/acme/.well-known/acme-challenge/">
+        Options None
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
+    RewriteRule ^ https://nasaespase.ghosstless.com%{REQUEST_URI} [R=301,L,NE]
+
+    ErrorLog ${APACHE_LOG_DIR}/nasaespase-error.log
+    CustomLog ${APACHE_LOG_DIR}/nasaespase-access.log combined
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName nasaespase.ghosstless.com
+
+    SSLEngine On
+    SSLCertificateFile /etc/letsencrypt/live/nasaespase-ghosstless/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/nasaespase-ghosstless/privkey.pem
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    RequestHeader set X-Forwarded-Proto "https"
+
+    Alias /.well-known/acme-challenge/ "/opt/nasaespase/acme/.well-known/acme-challenge/"
+    <Directory "/opt/nasaespase/acme/.well-known/acme-challenge/">
+        Options None
+        AllowOverride None
+        Require all granted
+    </Directory>
+    ProxyPass "/.well-known/acme-challenge/" "!"
+    ProxyPass "/" "http://127.0.0.1:18186/" connectiontimeout=5 timeout=60
+    ProxyPassReverse "/" "http://127.0.0.1:18186/"
+
+    ErrorLog ${APACHE_LOG_DIR}/nasaespase-error.log
+    CustomLog ${APACHE_LOG_DIR}/nasaespase-ssl-access.log combined
+</VirtualHost>

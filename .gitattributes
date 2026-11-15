@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.raw.json -text
+*.jpg -text
+*.zip -text
+dist/vendor/leaflet/* -text

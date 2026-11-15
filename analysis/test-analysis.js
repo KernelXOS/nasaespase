@@ -1,0 +1,32 @@
+'use strict';
+// Synthetic arrays here are unit-test fixtures only. They never enter data/dataset.json.
+const assert = require('node:assert/strict');
+const {linearTrend, studentTQuantile, studentTCdf} = require('./analysis.js');
+const close = (actual, expected, tolerance = 1e-10) => assert.ok(Math.abs(actual - expected) < tolerance, `${actual} != ${expected}`);
+const years = Array.from({length:25}, (_, i) => 2001 + i);
+const exact = linearTrend(years, years.map(year => 3 + 0.2 * (year - 2001)));
+close(exact.slopePerDecade, 2);
+close(exact.ci95[0], 2);
+close(exact.ci95[1], 2);
+close(exact.rSquared, 1);
+assert.equal(exact.degreesOfFreedom, 23);
+const constant = linearTrend(years, years.map(() => 7));
+assert.equal(constant.slopePerDecade, 0);
+assert.deepEqual(constant.ci95, [0, 0]);
+assert.equal(constant.rSquared, null);
+assert.equal(constant.residualLag1Correlation, null);
+// Independently tabulated 97.5th percentiles: df=1, 3, 8 and 23.
+close(studentTQuantile(0.975, 1), 12.7062047364321, 1e-8);
+close(studentTQuantile(0.975, 3), 3.18244630528426, 1e-9);
+close(studentTQuantile(0.975, 8), 2.30600413520417, 1e-9);
+close(studentTQuantile(0.975, 23), 2.06865761041904, 1e-9);
+close(studentTCdf(0, 23), 0.5);
+const noisy = linearTrend([1,2,3,4,5], [1,2,1,4,5]);
+close(noisy.slopePerYear, 1);
+close(noisy.standardErrorPerDecade, Math.sqrt(3.2 / 3 / 10) * 10);
+assert.ok(noisy.ci95[0] < noisy.slopePerDecade && noisy.ci95[1] > noisy.slopePerDecade);
+assert.equal(noisy.pValue, null);
+assert.throws(() => linearTrend([1,2], [1,2]));
+assert.throws(() => linearTrend([1,2,3], [1,null,3]));
+assert.throws(() => linearTrend([1,1,3], [1,2,3]));
+console.log('PASS: exact linear, constant, noisy reference, Student t critical values, and invalid inputs. Synthetic fixtures stay in tests only.');

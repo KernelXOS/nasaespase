@@ -1,0 +1,14 @@
+{
+  "name": "killa-earth-observation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Educational NASA POWER trend observatory for Ecuador",
+  "scripts": {
+    "start": "node tools/serve.cjs",
+    "test": "node analysis/test-analysis.js",
+    "data:build": "node analysis/build-dataset.js",
+    "map:build": "node analysis/build-cartography.js",
+    "check": "node --check dist/app.js"
+  },
+  "engines": { "node": ">=22" }
+}

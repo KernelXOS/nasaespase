@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "aiAssistance": {
+    "codeAndWriting": "AI-assisted; implementation tested against known statistical examples.",
+    "sourceData": "Original NASA API values; not AI-generated, interpolated or simulated."
+  },
+  "generatedAtUtc": "2026-11-15T03:12:15.590Z",
+  "project": "KILLA — Earth Change Observatory",
+  "source": "NASA POWER Monthly and Annual API; MERRA-2",
+  "documentation": [
+    {
+      "title": "NASA POWER Monthly and Annual API",
+      "url": "https://power.larc.nasa.gov/docs/services/api/temporal/monthly/"
+    },
+    {
+      "title": "NASA POWER Meteorological Data Sources and Validation",
+      "url": "https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/"
+    },
+    {
+      "title": "NASA POWER Data FAQs",
+      "url": "https://power.larc.nasa.gov/docs/faqs/data/"
+    },
+    {
+      "title": "NIST: Regression error independence",
+      "url": "https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd444.htm"
+    },
+    {
+      "title": "Penn State STAT 415: Simple Linear Regression, slope interval",
+      "url": "https://online.stat.psu.edu/stat415/Lesson12"
+    }
+  ],
+  "documentationCheckedOn": "2026-11-14 (America/Guayaquil)",
+  "requests": [
+    {
+      "locationId": "esmeraldas",
+      "contentType": "application/json",
+      "status": 200,
+      "url": "https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M,PRECTOTCORR&community=AG&longitude=-79.65&latitude=0.96&format=JSON&start=2001&end=2025",
+      "retrievedAtUtc": "2026-11-15T02:27:13.0298190Z",
+      "rawFile": "power-esmeraldas-2001-2025.raw.json",
+      "sha256": "0ea0011ed569aef2c34d7841f82c61f1a23b377e54bbb41ca634c38c59eb7b50",
+      "bytes": 9932,
+      "api": {
+        "version": "v2.10.0",
+        "name": "POWER Monthly and Annual API"
+      },
+      "sources": [
+        "MERRA2"
+      ],
+      "timeStandard": "LST",
+      "fillValue": -999,
+      "responseGeometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.65,
+          0.96,
+          92.4
+        ]
+      },
+      "parameterMetadata": {
+        "PRECTOTCORR": {
+          "units": "mm/day",
+          "longname": "Precipitation Corrected"
+        },
+        "T2M": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters"
+        }
+      },
+      "validation": "300 monthly and 25 annual observations per parameter; no missing/fill values; no API warning messages."
+    },
+    {
+      "locationId": "cuenca",
+      "contentType": "application/json",
+      "status": 200,
+      "url": "https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M,PRECTOTCORR&community=AG&longitude=-79.00&latitude=-2.90&format=JSON&start=2001&end=2025",
+      "retrievedAtUtc": "2026-11-15T02:27:13.6355128Z",
+      "rawFile": "power-cuenca-2001-2025.raw.json",
+      "sha256": "7ad8b8af6fef7b434c492a34d3faebeeab80b7ab4f339270f95e51671819a8b2",
+      "bytes": 9936,
+      "api": {
+        "version": "v2.10.0",
+        "name": "POWER Monthly and Annual API"
+      },
+      "sources": [
+        "MERRA2"
+      ],
+      "timeStandard": "LST",
+      "fillValue": -999,
+      "responseGeometry": {
+        "type": "Point",
+        "coordinates": [
+          -79,
+          -2.9,
+          2496.1
+        ]
+      },
+      "parameterMetadata": {
+        "PRECTOTCORR": {
+          "units": "mm/day",
+          "longname": "Precipitation Corrected"
+        },
+        "T2M": {
+          "units": "C",
+          "longname": "Temperature at 2 Meters"
+        }
+      },
+      "validation": "300 monthly and 25 annual observations per parameter; no missing/fill values; no API warning messages."
+    }
+  ],
+  "transformation": {
+    "period": {
+      "start": 2001,
+      "end": 2025
+    },
+    "annualKey": "YYYY13",
+    "sourceValues": "Annual entries preserved exactly as supplied by the NASA API; no synthetic or interpolated values.",
+    "missingPolicy": "Build fails if any monthly or annual value is absent, non-finite, or equals the NASA fill value.",
+    "statistic": "Ordinary least squares slope against year; per-decade slope = annual slope times 10; CI95 = 10 * [slope +/- t_(0.975,n-2) * sqrt((SSE/(n-2))/Sxx)].",
+    "uncertainty": "Nominal iid Student-t slope interval, no autocorrelation or multiple-comparison correction; no p-values.",
+    "sourcePrecision": "API annual values are already rounded to 0.01 source units. Analysis retains those reported values.",
+    "code": "../analysis/analysis.js",
+    "rebuild": "node analysis/build-dataset.js",
+    "tests": "node analysis/test-analysis.js"
+  },
+  "caveats": [
+    "Real NASA POWER MERRA-2 reanalysis grid estimates; not local station records and not direct satellite images.",
+    "Native meteorological resolution is 0.5 degrees latitude by 0.625 degrees longitude (roughly 56 by 70 km near the equator). Point coordinates select a source grid cell; the API geometry repeats request coordinates and does not identify exact cell boundaries.",
+    "The selected locations are sample grid cells near Esmeraldas and Cuenca, not averages of city or province boundaries. Coastal land/ocean mixing and the Andes terrain can differ from conditions at a specific school.",
+    "T2M is 2-metre air temperature at the average grid elevation. PRECTOTCORR is corrected precipitation; the API annual values remain mean daily precipitation in mm/day, not annual totals in mm/year.",
+    "Annual entries are the API-provided YYYY13 values. This prototype does not average monthly values or treat months as independent annual samples.",
+    "The 25-year window describes this chosen period, not a complete long-term climate record. Interannual variability, including ENSO, and reanalysis changes may affect the slopes. No causal attribution or forecast is made.",
+    "95% intervals describe regression sampling uncertainty under independent normal, constant-variance errors and a linear mean; assumptions have not been established. They omit reanalysis measurement/model uncertainty, temporal autocorrelation and spatial representation error.",
+    "Four location-variable comparisons are exploratory and are not corrected for multiple comparisons. Choosing many dates or regions can create chance patterns; the interface must not label a robust detection or rank significance.",
+    "Residual lag-1 correlation is a descriptive diagnostic, not a correction or a test of independence. P-values are intentionally omitted.",
+    "This educational prototype is not an operational warning, a site-specific forecast, or evidence that a particular event was caused by climate change."
+  ]
+}
